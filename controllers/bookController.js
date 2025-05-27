@@ -97,3 +97,60 @@ exports.deleteBook = async (req, res) => {
     res.status(500).json({ error: 'Erro ao deletar' });
   }
 };
+
+exports.getAll = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  try {
+    const items = await Model.find({ deletedAt: null })
+      .skip(skip)
+      .limit(limit);
+    
+    const total = await Model.countDocuments({ deletedAt: null });
+    
+    res.json({
+      data: items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao listar' });
+  }
+};
+
+exports.searchBooks = async (req, res) => {
+  const { q } = req.query;
+  
+  try {
+    const books = await Book.find({
+      $or: [
+        { title: { $regex: q, $options: 'i' } },
+        { 'authors.name': { $regex: q, $options: 'i' } },
+        { 'categories.name': { $regex: q, $options: 'i' } }
+      ]
+    }).populate('authors categories');
+    
+    res.json(books);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro na busca' });
+  }
+};
+
+exports.uploadCover = async (req, res) => {
+  try {
+    const book = await Book.findByIdAndUpdate(
+      req.params.id,
+      { coverImage: `/uploads/${req.file.filename}` },
+      { new: true }
+    );
+    res.json(book);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro no upload' });
+  }
+};

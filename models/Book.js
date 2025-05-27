@@ -8,7 +8,8 @@ const BookSchema = new mongoose.Schema({
   quantity: { type: Number, default: 1 },
   authors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Author' }],
   categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  coverImage: { type: String }
 });
 
 module.exports = mongoose.model('Book', BookSchema);

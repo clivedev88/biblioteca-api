@@ -52,3 +52,29 @@ exports.deleteAuthor = async (req, res) => {
     res.status(500).json({ error: 'Erro ao deletar' });
   }
 };
+
+exports.getAll = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  try {
+    const items = await Model.find({ deletedAt: null })
+      .skip(skip)
+      .limit(limit);
+    
+    const total = await Model.countDocuments({ deletedAt: null });
+    
+    res.json({
+      data: items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao listar' });
+  }
+};
