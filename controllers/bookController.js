@@ -71,3 +71,29 @@ exports.getBooks = async (req, res) => {
     });
   }
 };
+
+exports.updateBook = async (req, res) => {
+  try {
+    const updatedItem = await Model.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    res.json(updatedItem);
+  } catch (err) {
+    res.status(400).json({ error: 'Erro ao atualizar' });
+  }
+};
+
+exports.deleteBook = async (req, res) => {
+  try {
+    await Model.findByIdAndUpdate(
+      req.params.id,
+      { deletedAt: new Date() },
+      { new: true }
+    );
+    res.json({ message: 'Item marcado como excluído' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao deletar' });
+  }
+};

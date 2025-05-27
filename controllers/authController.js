@@ -1,7 +1,8 @@
 const User = require('../models/User');
 const sendConfirmationEmail = require('../utils/email');
 const { generateToken } = require('../config/jwt')
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
+const { Model } = require('mongoose');
 
 exports.register = async (req, res) => {
     const { name, email, password } = req.body;
@@ -74,4 +75,30 @@ exports.confirmEmail = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: 'Erro ao confirmar o e-mail.' })
     }
+};
+
+exports.updateUser = async (req, res) => {
+  try {
+    const updatedItem = await Model.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    res.json(updatedItem);
+  } catch (err) {
+    res.status(400).json({ error: 'Erro ao atualizar' });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    await Model.findByIdAndUpdate(
+      req.params.id,
+      { deletedAt: new Date() },
+      { new: true }
+    );
+    res.json({ message: 'Item marcado como excluído' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao deletar' });
+  }
 };
