@@ -1,39 +1,45 @@
 const Book = require('../models/Book');
+const Author = require('../models/Author');
+const Category = require('../models/Category');
 
 exports.createBook = async (req, res) => {
   try {
-    const book = await Book.create(req.body);
-    res.status(201).json(book);
-  } catch (err) {
-    console.error("Erro detalhado:", err);
-    res.status(400).json({ error: 'Erro ao criar livro' });
-  }
-};
-
-exports.getBooks = async (req, res) => {
-  try {
-    const books = await Book.find().populate('authors categories');
-    res.json(books);
-  } catch (err) {
-    console.error("Erro detalhado:", err);
-    res.status(500).json({ error: 'Erro ao buscar livros' });
-  }
-};
-
-const Book = require('../models/Book');
-
-exports.createBook = async (req, res) => {
-  try {
-    // Verifica se autores e categorias existem
     if (req.body.authors) {
-      // Validação opcional: verificar se os IDs de autores existem
+      const authorsExist = await Author.countDocuments({ 
+        _id: { $in: req.body.authors } 
+      });
+      
+      if (authorsExist !== req.body.authors.length) {
+        return res.status(400).json({ error: 'Um ou mais autores não existem' });
+      }
+    }
+
+    if (req.body.categories) {
+      const categoriesExist = await Category.countDocuments({ 
+        _id: { $in: req.body.categories } 
+      });
+      
+      if (categoriesExist !== req.body.categories.length) {
+        return res.status(400).json({ error: 'Uma ou mais categorias não existem' });
+      }
+    }
+
+    const book = await Book.create(req.body);
+    
+    if (req.body.authors) {
+      await Author.updateMany(
+        { _id: { $in: req.body.authors } },
+        { $push: { books: book._id } }
+      );
     }
     
     if (req.body.categories) {
-      // Validação opcional: verificar se os IDs de categorias existem
+      await Category.updateMany(
+        { _id: { $in: req.body.categories } },
+        { $push: { books: book._id } }
+      );
     }
 
-    const book = await Book.create(req.body);
     res.status(201).json(book);
   } catch (err) {
     console.error("Erro detalhado:", err);
@@ -49,11 +55,11 @@ exports.getBooks = async (req, res) => {
     const books = await Book.find()
       .populate({
         path: 'authors',
-        select: 'name nationality' // Campos específicos para popular
+        select: 'name nationality'
       })
       .populate({
         path: 'categories',
-        select: 'name' // Campos específicos para popular
+        select: 'name description'
       });
       
     res.json(books);

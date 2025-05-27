@@ -1,14 +1,21 @@
 const Author = require('../models/Author');
 
 exports.createAuthor = async (req, res) => {
-    try {
-        const author = await Author.create(req.body);
-        res.status(201).json(author)
-    } catch (err) {
-        console.error('Erro detalhado:', err);
-        res.status(400).json({ error: 'Erro ao buscar autores.' })
+  try {
+    if (!req.body.name) {
+      return res.status(400).json({ error: 'Nome é obrigatório' });
     }
-}
+    
+    const author = await Author.create(req.body);
+    res.status(201).json(author);
+  } catch (err) {
+    console.error('Erro detalhado:', err);
+    res.status(400).json({ 
+      error: 'Erro ao criar autor',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+};
 
 exports.getAuthors = async (req, res) => {
     try {
