@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
 
         res.status(201).json({ message: 'Registro realizado com sucesso! Verifique seu e-mail.', token })
     } catch (err) {
-        console.error("Erro detalhado:", err);
+        Cconsole.error("Erro detalhado:", err);
         res.status(500).json({ 
             error: 'Erro no servidor',
             details: process.env.NODE_ENV === 'development' ? err.message : undefined
