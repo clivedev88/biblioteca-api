@@ -11,4 +11,4 @@ const verifyToken = (token) => {
 };
  
 
-export default { generateToken, verifyToken};
+module.exports = { generateToken, verifyToken};

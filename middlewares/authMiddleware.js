@@ -4,7 +4,7 @@ exports.authenticate = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer', '');
 
     if (!token) {
-        return res.statu(401).json({ error: 'Acesso negado!!!' });
+        return res.status(401).json({ error: 'Acesso negado!!!' });
     }
 
     try {
